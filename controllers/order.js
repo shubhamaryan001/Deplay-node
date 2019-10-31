@@ -97,6 +97,18 @@ exports.updateOrderStatus = (req, res) => {
           error: errorHandler(err)
         });
       }
+
+      const userOrderUpdate = {
+        to: `${req.body.orderEmail}`,
+        from: "shubhamaryan472@gmail.com",
+        subject: `Order Live Update`,
+        html: `
+        <p>Order Status:${req.body.status}</p>
+
+        <p>Thank For Trusting Us</p>
+    `
+      };
+      trasporter.sendMail(userOrderUpdate);
       res.json(order);
     }
   );
