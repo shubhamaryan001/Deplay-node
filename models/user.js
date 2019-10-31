@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema(
       unique: true,
       maxlength: 10
     },
+    photo: {
+      data: Buffer,
+      contentType: String
+    },
     hashed_password: {
       type: String,
       required: true
@@ -49,6 +53,12 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
+    chatList: [
+      {
+        receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        msgId: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' }
+      }
+    ],
     history: {
       type: Array,
       default: []

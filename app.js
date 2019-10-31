@@ -4,10 +4,20 @@ const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const expressValidator = require("express-validator");
-
 const cors = require("cors");
-require("dotenv").config();
+//App
+const app = express();
 
+
+const server = require('http').createServer(app);
+
+const io = require('socket.io').listen(server);
+
+require('./socket/private')(io);
+require('./socket/streams')(io);
+
+
+require("dotenv").config();
 //import routes
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
@@ -17,8 +27,9 @@ const productRoutes = require("./routes/product");
 const walletRoutes = require("./routes/wallet");
 const paymentRoutes = require("./routes/payment");
 const orderRoutes = require("./routes/order");
-//App
-const app = express();
+const messageRoutes = require("./routes/message");
+
+
 
 //DB
 mongoose.connect(
@@ -52,8 +63,9 @@ app.use("/api", productRoutes);
 app.use("/api", walletRoutes);
 app.use("/api", paymentRoutes);
 app.use("/api", orderRoutes);
+app.use("/api", messageRoutes);
 const port = process.env.PORT || 8000;
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`server is running on port ${port}`);
 });
