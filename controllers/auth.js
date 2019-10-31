@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const _ = require("lodash");
-
+const sgMail = require('@sendgrid/mail');
+const sgTransport = require('nodemailer-sendgrid-transport');
 const jwt = require("jsonwebtoken"); // to generate signed token
 const expressJwt = require("express-jwt"); // for authorization check
 const { errorHandler } = require("../helpers/dbErrorHandler");
@@ -8,13 +9,32 @@ const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const trasporter = nodemailer.createTransport({
-  service: "gmail",
+// const trasporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: "shubhamaryan472@gmail.com",
+//     pass: "intex472"
+//   }
+// });
+
+
+
+
+
+const options = {
   auth: {
-    user: "shubhamaryan472@gmail.com",
-    pass: "intex472"
+    api_user: 'saurabharyan',
+    api_key: 'Saurabh@001'
   }
-});
+}
+
+const client = nodemailer.createTransport(sgTransport(options));
+
+
+
+
+
+
 
 exports.signup = (req, res) => {
   // console.log("req.body", req.body);
@@ -128,7 +148,25 @@ exports.forgotPassword = (req, res) => {
       if (err) {
         return res.json({ message: err });
       } else {
-        trasporter.sendMail(emailData);
+
+
+        client.sendMail(emailData, function(err, info){
+      if (err ){
+        console.log(error);
+      }
+      else {
+        console.log('Message sent:');
+      }
+      });
+
+
+        // trasporter.sendMail(emailData);
+
+
+
+
+
+
         return res.status(200).json({
           message: `Email has been sent to ${email}. Follow the instructions to reset your password.`
         });
