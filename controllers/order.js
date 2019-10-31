@@ -2,18 +2,37 @@ const { Order, CartItem } = require("../models/order");
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const nodemailer = require("nodemailer");
 const defaultEmailData = { from: "noreply@node-react.com" };
+const sgMail = require('@sendgrid/mail');
+const sgTransport = require('nodemailer-sendgrid-transport');
 
-const trasporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: false,
-  requireTLS: true,
 
+// const trasporter = nodemailer.createTransport({
+//   host: "smtp.gmail.com",
+//   port: 465,
+//   secure: false,
+//   requireTLS: true,
+//
+//   auth: {
+//     user: "shubhamaryan472@gmail.com",
+//     pass: "intex472"
+//   }
+// });
+
+
+const options = {
   auth: {
-    user: "shubhamaryan472@gmail.com",
-    pass: "intex472"
+    api_user: 'saurabharyan',
+    api_key: 'Saurabh@001'
   }
-});
+}
+
+
+
+
+const client = nodemailer.createTransport(sgTransport(options));
+
+
+
 exports.orderById = (req, res, next, id) => {
   Order.findById(id)
     .populate("products.product", "name price")
@@ -45,16 +64,19 @@ exports.create = (req, res) => {
       from: "noreply@node-react.com",
       subject: `A new order is received`,
       html: `
+      <div>
       <p>Customer name:${order.user.name}</p>
       <p>Total products: ${order.products.length}</p>
       <p>Total cost: ${order.amount},${order.user.email}</p>
       <p>Login to dashboard to the order in detail.</p>
+      </div>
+
   `
     };
 
     const userEmailData = {
       to: `${order.user.email}`,
-      from: "shubhamaryan472@gmail.com",
+      from: "noreply@node-react.com",
       subject: `A new order is received`,
       html: `
       <p>Customer name:${order.user.name}</p>
@@ -63,8 +85,28 @@ exports.create = (req, res) => {
       <p>Thank For Trusting Us</p>
   `
     };
-    trasporter.sendMail(emailData);
-    trasporter.sendMail(userEmailData);
+
+
+
+    client.sendMail(emailData, function(err, info){
+  if (err ){
+    console.log(error);
+  }
+  else {
+    console.log('Message sent:');
+  }
+});
+
+client.sendMail(userEmailData, function(err, info){
+if (err ){
+console.log(error);
+}
+else {
+console.log('Message sent:');
+}
+});
+    // trasporter.sendMail(emailData);
+    // trasporter.sendMail(userEmailData);
     res.json(data);
   });
 };
@@ -100,15 +142,30 @@ exports.updateOrderStatus = (req, res) => {
 
       const userOrderUpdate = {
         to: `${req.body.orderEmail}`,
-        from: "shubhamaryan472@gmail.com",
+        from: "noreply@node-react.com",
         subject: `Order Live Update`,
         html: `
+        <div>
         <p>Order Status:${req.body.status}</p>
 
         <p>Thank For Trusting Us</p>
+        </div>
+
     `
       };
-      trasporter.sendMail(userOrderUpdate);
+
+
+      client.sendMail(userOrderUpdate, function(err, info){
+    if (err ){
+      console.log(error);
+    }
+    else {
+      console.log('Message sent:');
+    }
+});
+
+
+      // trasporter.sendMail(userOrderUpdate);
       res.json(order);
     }
   );
