@@ -157,6 +157,7 @@ exports.forgotPassword = (req, res) => {
       else {
         console.log('Message sent:');
       }
+      
       });
 
 

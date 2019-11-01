@@ -5,7 +5,17 @@ const defaultEmailData = { from: "noreply@node-react.com" };
 const sgMail = require('@sendgrid/mail');
 const sgTransport = require('nodemailer-sendgrid-transport');
 
+const accountSid = 'AC8641b461a07dfa36d3b840ca8f6b8917';
+const authToken = '0e13b7c16b50abbcaf9c400db41db5aa';
 
+const unirest = require("unirest");
+
+const twilio = require('twilio');
+
+
+
+
+const clientwhat = require('twilio')(accountSid, authToken);
 // const trasporter = nodemailer.createTransport({
 //   host: "smtp.gmail.com",
 //   port: 465,
@@ -17,6 +27,22 @@ const sgTransport = require('nodemailer-sendgrid-transport');
 //     pass: "intex472"
 //   }
 // });
+
+
+const fast2sms = unirest("POST", "https://www.fast2sms.com/dev/bulk");
+
+fast2sms.headers({
+
+  "authorization": "WSH8p51mOhD4kwEbZdfoRxAvQJIKTPVgt72qeyCaUzBNXYMjuGudBGlhSfys7i1F3MNqpLnT6wYzVKPe"
+});
+
+
+const fast2cus = unirest("POST", "https://www.fast2sms.com/dev/bulk");
+
+fast2cus.headers({
+
+  "authorization": "WSH8p51mOhD4kwEbZdfoRxAvQJIKTPVgt72qeyCaUzBNXYMjuGudBGlhSfys7i1F3MNqpLnT6wYzVKPe"
+});
 
 
 const options = {
@@ -129,8 +155,8 @@ exports.getStatusValues = (req, res) => {
   res.json(Order.schema.path("status").enumValues);
 };
 
-exports.updateOrderStatus = (req, res) => {
-  Order.update(
+exports.updateOrderStatus = (req, res) =>{
+ Order.update(
     { _id: req.body.orderId },
     { $set: { status: req.body.status } },
     (err, order) => {
@@ -154,18 +180,47 @@ exports.updateOrderStatus = (req, res) => {
     `
       };
 
+      clientwhat.messages
+        .create({
+          from:'whatsapp:+14155238886',
+          to:'whatsapp:+917011944204',
+          body:`hello sir You update the order to ${req.body.status} with Order Id ${req.body.orderId}`
+        }).then(message=>{
+          console.log(message.sid);
+        });
 
-      client.sendMail(userOrderUpdate, function(err, info){
-    if (err ){
-      console.log(error);
-    }
-    else {
-      console.log('Message sent:');
-    }
+
+
+
+  fast2cus.form({
+  "sender_id": "FSTSMS",
+  "language": "english",
+  "route": "p",
+  "numbers": `${req.body.orderMobile}`,
+  "message": `hello sir order has been ${req.body.status}`
+});
+
+ fast2cus.end(function (res) {
+  if (res.error) throw new Error(res.error);
+  console.log(res.body);
 });
 
 
-      // trasporter.sendMail(userOrderUpdate);
+ fast2sms.form({
+  "sender_id": "FSTSMS",
+  "language": "english",
+  "route": "p",
+  "numbers": "7011944204",
+  "message": `hello sir You update the order to ${req.body.status} with Order Id ${req.body.orderId} `
+});
+
+fast2sms.end(function (res) {
+  if (res.error) throw new Error(res.error);
+  console.log(res.body);
+});
+
+      
+
       res.json(order);
     }
   );
