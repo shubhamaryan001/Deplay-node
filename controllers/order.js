@@ -32,7 +32,8 @@ const clientwhat = require('twilio')(accountSid, authToken);
 const fast2sms = unirest("POST", "https://www.fast2sms.com/dev/bulk");
 
 fast2sms.headers({
-
+  "content-type": "application/x-www-form-urlencoded",
+   "cache-control": "no-cache",
   "authorization": "WSH8p51mOhD4kwEbZdfoRxAvQJIKTPVgt72qeyCaUzBNXYMjuGudBGlhSfys7i1F3MNqpLnT6wYzVKPe"
 });
 
@@ -193,11 +194,13 @@ exports.updateOrderStatus = (req, res) =>{
 
 
   fast2cus.form({
-  "sender_id": "FSTSMS",
-  "language": "english",
-  "route": "p",
-  "numbers": `${req.body.orderMobile}`,
-  "message": `hello sir order has been ${req.body.status}`
+    "sender_id": "FSTSMS",
+    "language": "english",
+    "route": "qt",
+    "numbers": `${req.body.orderMobile}`,
+    "message": "17920",
+    "variables": "{#BB#}|{#EE#}",
+    "variables_values": `${req.body.status}|${req.body.orderId}`
 });
 
  fast2cus.end(function (res) {
@@ -206,20 +209,20 @@ exports.updateOrderStatus = (req, res) =>{
 });
 
 
- fast2sms.form({
-  "sender_id": "FSTSMS",
-  "language": "english",
-  "route": "p",
-  "numbers": "7011944204",
-  "message": `hello sir You update the order to ${req.body.status} with Order Id ${req.body.orderId} `
-});
+//  fast2sms.form({
+//   "sender_id": "FSTSMS",
+//   "language": "english",
+//   "route": "p",
+//   "numbers": "7011944204",
+//   "message": `hello sir You update the order to ${req.body.status} with Order Id ${req.body.orderId} `
+// });
+//
+// fast2sms.end(function (res) {
+//   if (res.error) throw new Error(res.error);
+//   console.log(res.body);
+// });
 
-fast2sms.end(function (res) {
-  if (res.error) throw new Error(res.error);
-  console.log(res.body);
-});
 
-      
 
       res.json(order);
     }
